@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Indian Flag with Cloth Physics</title>
+  <style>
+    body { margin: 0; overflow: hidden; background: transparent; }
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+<script type="module">
+  import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js';
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+  camera.position.set(0, 0, 6);
+
+  const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
+
+  // Lighting
+  const light = new THREE.DirectionalLight(0xffffff, 1.5);
+  light.position.set(5, 10, 10);
+  scene.add(light);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+
+  // Create vibrant flag texture
+  const canvas = document.createElement('canvas');
+  canvas.width = 900;
+  canvas.height = 600;
+  const ctx = canvas.getContext('2d');
+
+  const bandHeight = canvas.height / 3;
+  ctx.fillStyle = '#FF671F'; // Saffron
+  ctx.fillRect(0, 0, canvas.width, bandHeight);
+  ctx.fillStyle = '#FFFFFF'; // White
+  ctx.fillRect(0, bandHeight, canvas.width, bandHeight);
+  ctx.fillStyle = '#046A38'; // Green
+  ctx.fillRect(0, bandHeight * 2, canvas.width, bandHeight);
+
+  // Ashoka Chakra
+  const cx = canvas.width / 2;
+  const cy = canvas.height / 2;
+  const r = 50;
+  ctx.strokeStyle = '#000080';
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+  ctx.stroke();
+  for (let i = 0; i < 24; i++) {
+    const a = (i * Math.PI * 2) / 24;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + r * Math.cos(a), cy + r * Math.sin(a));
+    ctx.stroke();
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.anisotropy = 8;
+
+  // Use PlaneGeometry instead of ParametricGeometry
+  const segmentsX = 30;
+  const segmentsY = 15;
+  const width = 3;
+  const height = 2;
+  const geometry = new THREE.PlaneGeometry(width, height, segmentsX, segmentsY);
+
+  const material = new THREE.MeshStandardMaterial({
+    map: texture,
+    side: THREE.DoubleSide,
+    roughness: 0,
+    metalness: 0.05,
+  });
+
+  const flag = new THREE.Mesh(geometry, material);
+  scene.add(flag);
+
+  // Create cloth particles
+  const restDistance = width / segmentsX;
+  const particles = [];
+  const constraints = [];
+
+  for (let v = 0; v <= segmentsY; v++) {
+    for (let u = 0; u <= segmentsX; u++) {
+      const x = (u / segmentsX - 0.5) * width;
+      const y = (0.5 - v / segmentsY) * height;
+      const idx = v * (segmentsX + 1) + u;
+      particles[idx] = {
+        position: new THREE.Vector3(x, y, 0),
+        previous: new THREE.Vector3(x, y, 0),
+        pinned: u === 0, // Left edge pinned
+      };
+    }
+  }
+
+  // Add spring-like constraints
+  function addConstraint(i1, i2) {
+    constraints.push([i1, i2]);
+  }
+
+  for (let v = 0; v <= segmentsY; v++) {
+    for (let u = 0; u <= segmentsX; u++) {
+      const i = v * (segmentsX + 1) + u;
+      if (u < segmentsX) addConstraint(i, i + 1);
+      if (v < segmentsY) addConstraint(i, i + segmentsX + 1);
+    }
+  }
+
+  const gravity = new THREE.Vector3(0, -0.0006, 0);
+  const windForce = new THREE.Vector3(0.01, 0, 0);
+
+  function simulatePhysics() {
+    for (let p of particles) {
+      if (p.pinned) continue;
+      const velocity = p.position.clone().sub(p.previous);
+      p.previous.copy(p.position);
+      p.position.add(velocity);
+      p.position.add(gravity);
+      p.position.add(windForce.clone().multiplyScalar(Math.random()));
+    }
+
+    for (let i = 0; i < 3; i++) {
+      for (let [aIdx, bIdx] of constraints) {
+        const a = particles[aIdx];
+        const b = particles[bIdx];
+        const diff = b.position.clone().sub(a.position);
+        const dist = diff.length();
+        const offset = diff.multiplyScalar((dist - restDistance) / dist / 2);
+        if (!a.pinned) a.position.add(offset);
+        if (!b.pinned) b.position.sub(offset);
+      }
+    }
+
+    // Update geometry positions
+    const pos = geometry.attributes.position;
+    for (let i = 0; i < particles.length; i++) {
+      pos.setXYZ(i, particles[i].position.x, particles[i].position.y, particles[i].position.z);
+    }
+    pos.needsUpdate = true;
+  }
+
+  function animate() {
+    requestAnimationFrame(animate);
+    simulatePhysics();
+    renderer.render(scene, camera);
+  }
+
+  animate();
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+</script>
+</body>
+</html>
