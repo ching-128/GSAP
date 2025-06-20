@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GSAP - Navigation Animation</title>
+
+    <style>
+        body {
+            background-color: rgb(47, 47, 47);
+        }
+        .item{
+            width: max-content;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .item .circle{
+            display: inline-flex;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #fff;
+        }
+        
+        .item .text{
+            font-size: 36px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="item">
+            <span class="circle"></span>
+            <h2 class="text">Home</h2>
+        </div>
+        <div class="item">
+            <span class="circle"></span>
+            <h2 class="text">About Us</h2>
+        </div>
+        <div class="item">
+            <span class="circle"></span>
+            <h2 class="text">Services</h2>
+        </div>
+        <div class="item">
+            <span class="circle"></span>
+            <h2 class="text">Portfolio</h2>
+        </div>
+        <div class="item">
+            <span class="circle"></span>
+            <h2 class="text">Contact Us</h2>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+    <script>
+        const items = document.querySelectorAll('.item');
+
+        let timeline = gsap.timeline({paused:true});
+
+        timeline
+            .to(".text",{
+                color: "orange",
+                x: 10
+            })
+            .to(".circle",{
+                backgroundColor: "orange",
+                scale: 1.5
+            },"<");
+
+        items.forEach((item)=> {
+            item.addEventListener("mouseenter",()=>timeline.play())
+            item.addEventListener("mouseleave",()=>timeline.reverse())
+        })
+        console.log(items);
+        
+    </script>
+</body>
+</html>
