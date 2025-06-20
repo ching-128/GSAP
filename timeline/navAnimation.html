@@ -1,81 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GSAP - Navigation Animation</title>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>GSAP - Navigation Animation</title>
 
-    <style>
-        body {
-            background-color: rgb(47, 47, 47);
-        }
-        .item{
-            width: max-content;
-            color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        .item .circle{
-            display: inline-flex;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background-color: #fff;
-        }
-        
-        .item .text{
-            font-size: 36px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="item">
-            <span class="circle"></span>
-            <h2 class="text">Home</h2>
-        </div>
-        <div class="item">
-            <span class="circle"></span>
-            <h2 class="text">About Us</h2>
-        </div>
-        <div class="item">
-            <span class="circle"></span>
-            <h2 class="text">Services</h2>
-        </div>
-        <div class="item">
-            <span class="circle"></span>
-            <h2 class="text">Portfolio</h2>
-        </div>
-        <div class="item">
-            <span class="circle"></span>
-            <h2 class="text">Contact Us</h2>
-        </div>
-    </div>
+		<style>
+			body {
+				background-color: rgb(47, 47, 47);
+			}
+			.item {
+				width: max-content;
+				color: #a5a5a5;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				gap: 20px;
+                cursor: pointer;
+			}
+			.item .circle {
+				display: inline-flex;
+				width: 15px;
+				height: 15px;
+				border-radius: 50%;
+				background-color: #fff;
+			}
 
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
-    <script>
-        const items = document.querySelectorAll('.item');
+			.item .text {
+				font-size: 36px;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<div class="item">
+				<span class="circle"></span>
+				<h2 class="text">Home</h2>
+			</div>
+			<div class="item">
+				<span class="circle"></span>
+				<h2 class="text">About Us</h2>
+			</div>
+			<div class="item">
+				<span class="circle"></span>
+				<h2 class="text">Services</h2>
+			</div>
+			<div class="item">
+				<span class="circle"></span>
+				<h2 class="text">Portfolio</h2>
+			</div>
+			<div class="item">
+				<span class="circle"></span>
+				<h2 class="text">Contact Us</h2>
+			</div>
+		</div>
 
-        let timeline = gsap.timeline({paused:true});
+		<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+		<script>
+			const items = document.querySelectorAll(".item");
 
-        timeline
-            .to(".text",{
-                color: "orange",
-                x: 10
-            })
-            .to(".circle",{
-                backgroundColor: "orange",
-                scale: 1.5
-            },"<");
+			items.forEach((item) => {
+				let timeline = gsap.timeline({ paused: true });
+                gsap.defaults({duration: 0.3})
+				let text = item.querySelector(".text");
+				let circle = item.querySelector(".circle");
 
-        items.forEach((item)=> {
-            item.addEventListener("mouseenter",()=>timeline.play())
-            item.addEventListener("mouseleave",()=>timeline.reverse())
-        })
-        console.log(items);
-        
-    </script>
-</body>
+				timeline
+					.to(text, {
+						color: "#FFF",
+						x: 10,
+                        scale: 1.1,
+                        transformOrigin: "left center",
+					})
+					.to(
+						circle,
+						{
+							backgroundColor: "orange",
+							scale: 1.5,
+						},
+						"<"
+					);
+
+				item.addEventListener("mouseenter", () => timeline.play());
+				item.addEventListener("mouseleave", () => timeline.reverse());
+				console.log(item);
+			});
+		</script>
+	</body>
 </html>
